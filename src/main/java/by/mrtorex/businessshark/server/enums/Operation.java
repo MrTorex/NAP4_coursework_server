@@ -1,0 +1,38 @@
+package by.mrtorex.businessshark.server.enums;
+
+public enum Operation {
+    // Stock CRUD
+    CREATE_STOCK,
+    READ_STOCK_DATA,
+    UPDATE_STOCK,
+    DELETE_STOCK,
+
+    // Company CRUD
+    CREATE_COMPANY,
+    READ_COMPANY_DATA,
+    UPDATE_COMPANY,
+    DELETE_COMPANY,
+
+    // User CRUD
+    CREATE_USER,
+    READ_USER,
+    UPDATE_USER,
+    DELETE_USER,
+
+    // GET ALL
+    GET_ALL_COMPANIES,
+    GET_ALL_STOCKS,
+    GET_ALL_USERS,
+    GET_ALL_ROLES,
+
+    // MANY-TO-MANY RELATIONS
+    GET_STOCKS_BY_COMPANY,
+    GET_COMPANY_BY_STOCK,
+    JOIN_STOCK_COMPANY,
+    SEPARATE_STOCK_COMPANY,
+
+    // SYSTEM
+    LOGIN,
+    REGISTER,
+    DISCONNECT
+}
