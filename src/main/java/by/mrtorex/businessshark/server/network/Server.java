@@ -1,5 +1,7 @@
 package by.mrtorex.businessshark.server.network;
 
+import by.mrtorex.businessshark.server.config.SessionConfig;
+
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ResourceBundle;
@@ -22,6 +24,7 @@ public class Server {
             System.out.println("Сервер запущен на порте " + serverPort + "!");
 
             startMonitoring();
+            connectToDatabase();
 
             while (true) {
                 Socket clientAccepted = serverSocket.accept();
@@ -63,5 +66,16 @@ public class Server {
 
     public static synchronized void decrementClientCount() {
         clientCount--;
+    }
+
+    private static void connectToDatabase() {
+        new Thread(() -> {
+            System.out.println("Попытка подключения к БД...");
+            try {
+                System.out.println("Соединение с БД установлено: " + SessionConfig.getInstance());
+            } catch (Exception e) {
+                System.err.println("Соединение с БД установить не вышло: " + e.getMessage());
+            }
+        }).start();
     }
 }

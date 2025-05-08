@@ -97,7 +97,7 @@ public class ClientThread implements Runnable {
 
                 // MANY-TO-MANY RELATIONS
                 case GET_COMPANY_BY_STOCK -> companyController.getCompanyByStock(request);
-                case GET_STOCKS_BY_COMPANY -> stockController.getStocksByCompany(request);
+                case GET_STOCK_BY_COMPANY -> stockController.getStocksByCompany(request);
                 case SEPARATE_STOCK_COMPANY, JOIN_STOCK_COMPANY ->
                         companyStockController.processCompanyStockRelationship(request);
 
