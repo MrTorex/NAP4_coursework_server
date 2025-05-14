@@ -20,12 +20,12 @@ public class UserService implements Service<User> {
         }
 
         String login = user.getUsername();
-        String password = user.getPassword();
+        String passwordHash = user.getPasswordHash();
 
         // Fetch user from the database using login
         User existingUser = userDAO.findByLogin(login);
 
-        if (existingUser != null && existingUser.getPassword().equals(password)) {
+        if (existingUser != null && existingUser.getPasswordHash().equals(passwordHash)) {
             return existingUser;
         } else {
             throw  new ResponseException("LOGIN_FAIL: Invalid login or password");

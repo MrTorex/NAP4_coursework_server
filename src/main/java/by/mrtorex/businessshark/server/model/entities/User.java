@@ -28,8 +28,8 @@ public class User {
     private String username;
 
     @Expose
-    @Column(nullable = false, length = 255)
-    private String password;
+    @Column(name = "password_hash", nullable = false, length = 64)
+    private String passwordHash;
 
     @Expose
     @ManyToOne(fetch = FetchType.EAGER)

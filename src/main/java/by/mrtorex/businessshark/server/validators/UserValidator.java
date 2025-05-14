@@ -15,8 +15,8 @@ public class UserValidator implements Validatable<User> {
         return user != null &&
                 user.getUsername() != null &&
                 !user.getUsername().isEmpty() &&
-                user.getPassword() != null &&
-                !user.getPassword().isEmpty();
+                user.getPasswordHash() != null &&
+                !user.getPasswordHash().isEmpty();
     }
 }
 
