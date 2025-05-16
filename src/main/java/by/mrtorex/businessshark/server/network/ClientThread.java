@@ -88,6 +88,7 @@ public class ClientThread implements Runnable {
                 case READ_USER -> userController.readEntity(request);
                 case DELETE_USER -> userController.deleteUser(request);
                 case UPDATE_USER -> userController.updateEntity(request);
+                case CREATE_USER -> userController.register(request);
 
                 // GET ALL
                 case GET_ALL_COMPANIES -> companyController.getAllCompanies();
