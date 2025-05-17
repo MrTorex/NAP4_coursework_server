@@ -31,7 +31,6 @@ public class StockService implements Service<Stock> {
         stockDAO.delete(existingStock);
     }
 
-    @Override
     public void updateEntity(Stock stock) {
         Stock existingStock = stockDAO.findById(stock.getId());
 
@@ -55,5 +54,14 @@ public class StockService implements Service<Stock> {
 
     public Stock findByTicket(String ticket) {
         return stockDAO.findByTicket(ticket);
+    }
+
+    public Stock create(Stock stock) throws ResponseException {
+        if (stockDAO.findByTicket(stock.getTicket()) != null) {
+            throw new ResponseException("CREATE_FAIL: Stock with this ticket already exists");
+        }
+
+        stockDAO.save(stock);
+        return stock;
     }
 }

@@ -24,7 +24,7 @@ public class Deserializer {
 
                 // Stock operations
                 case CREATE_STOCK, UPDATE_STOCK -> gson.fromJson(request.getData(), Stock.class);
-                case READ_STOCK_DATA, DELETE_STOCK -> gson.fromJson(request.getData(), String.class);
+                case READ_STOCK_DATA, DELETE_STOCK -> gson.fromJson(request.getData(), Integer.class);
 
                 // Many-to-many relations
                 case JOIN_STOCK_COMPANY, SEPARATE_STOCK_COMPANY ->
