@@ -114,13 +114,12 @@ public class UserController {
                 return new Response(false, "Some of the users don't exist", null);
             }
 
-            if (Objects.equals(userToUpdate.getId(), userThatOperate.getId())) {
-                return new Response(false, "You can't edit your profile", null);
-            }
-
             try {
                 userService.updateEntity(userToUpdate, personService);
-                return new Response(true, "User and associated Person updated successfully", null);
+                if (Objects.equals(userToUpdate.getId(), userThatOperate.getId()))
+                    return new Response(true, "User and associated Person updated successfully. It was your user, so you need to login again.", null);
+                else
+                    return new Response(true, "User and associated Person updated successfully", null);
             } catch (ResponseException e) {
                 return new Response(false, e.getMessage(), null);
             }
