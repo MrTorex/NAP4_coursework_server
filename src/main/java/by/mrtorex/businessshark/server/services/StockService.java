@@ -52,6 +52,10 @@ public class StockService implements Service<Stock> {
         return stockDAO.findAll();
     }
 
+    public List<Stock> findAllEntitiesWithNoCompany() {
+        return stockDAO.findAllWithNoCompany();
+    }
+
     public Stock findByTicket(String ticket) {
         return stockDAO.findByTicket(ticket);
     }

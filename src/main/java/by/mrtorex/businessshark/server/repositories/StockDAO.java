@@ -53,6 +53,28 @@ public class StockDAO implements DAO<Stock> {
         }
     }
 
+    public List<Stock> findAllWithNoCompany() {
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+
+            String sql = """
+            SELECT * FROM Stocks 
+            WHERE id NOT IN (SELECT stock_id FROM Company_Stock)
+        """;
+
+            List<Stock> unassignedStocks = session
+                    .createNativeQuery(sql, Stock.class)
+                    .getResultList();
+
+            session.getTransaction().commit();
+            return unassignedStocks;
+        } catch (Exception e) {
+            // Используй свой AlertUtil, если он доступен в этом контексте
+            System.err.println("Ошибка загрузки акций: " + e.getMessage());
+            return List.of(); // Возвращаем пустой список при ошибке
+        }
+    }
+
     public Stock findByTicket(String ticket) {
         try (Session session = sessionFactory.openSession()) {
             CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();

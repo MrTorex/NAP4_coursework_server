@@ -3,12 +3,15 @@ package by.mrtorex.businessshark.server.repositories;
 import by.mrtorex.businessshark.server.config.SessionConfig;
 import by.mrtorex.businessshark.server.interfaces.DAO;
 import by.mrtorex.businessshark.server.model.entities.Company;
+import by.mrtorex.businessshark.server.model.entities.Stock;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.query.Query;
+
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.query.Query;
 
 import java.util.List;
 
@@ -63,6 +66,57 @@ public class CompanyDAO implements DAO<Company> {
             return query.uniqueResult();
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    public Company findByStockId(int stockId) {
+        try (Session session = sessionFactory.openSession()) {
+            String sql = """
+                SELECT c.* FROM Companies c
+                JOIN Company_Stock cs ON c.id = cs.company_id
+                WHERE cs.stock_id = :stockId
+            """;
+            NativeQuery<Company> query = session.createNativeQuery(sql, Company.class);
+            query.setParameter("stockId", stockId);
+            return query.uniqueResult();
+        }
+    }
+
+    public void addStockToCompany(int companyId, int stockId) {
+        executeTransaction(sessionFactory, (session, unused) -> {
+            String sql = """
+                INSERT INTO Company_Stock (company_id, stock_id)
+                VALUES (:companyId, :stockId)
+            """;
+            session.createNativeQuery(sql)
+                    .setParameter("companyId", companyId)
+                    .setParameter("stockId", stockId)
+                    .executeUpdate();
+        }, null);
+    }
+
+    public void removeStockFromCompany(int stockId) {
+        executeTransaction(sessionFactory, (session, unused) -> {
+            String sql = """
+                DELETE FROM Company_Stock
+                WHERE stock_id = :stockId
+            """;
+            session.createNativeQuery(sql)
+                    .setParameter("stockId", stockId)
+                    .executeUpdate();
+        }, null);
+    }
+
+    public List<Stock> getCompanyStocks(int companyId) {
+        try (Session session = sessionFactory.openSession()) {
+            String sql = """
+                SELECT s.* FROM Stocks s
+                JOIN Company_Stock cs ON s.id = cs.stock_id
+                WHERE cs.company_id = :companyId
+            """;
+            NativeQuery<Stock> query = session.createNativeQuery(sql, Stock.class);
+            query.setParameter("companyId", companyId);
+            return query.getResultList();
         }
     }
 }

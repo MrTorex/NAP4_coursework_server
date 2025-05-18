@@ -26,10 +26,6 @@ public class Company {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @Expose
-    @Column(name = "stock_id", nullable = false)
-    private Integer stock;
-
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

@@ -95,12 +95,13 @@ public class ClientThread implements Runnable {
                 case GET_ALL_USERS -> userController.getAllUsers();
                 case GET_ALL_STOCKS -> stockController.getAllStocks();
                 case GET_ALL_ROLES -> roleController.getAllRoles();
+                case GET_ALL_STOCKS_WITH_NO_COMPANY -> stockController.getAllStocksWithNoCompany();
 
                 // MANY-TO-MANY RELATIONS
                 case GET_COMPANY_BY_STOCK -> companyController.getCompanyByStock(request);
-                case GET_STOCK_BY_COMPANY -> stockController.getStocksByCompany(request);
-                case SEPARATE_STOCK_COMPANY, JOIN_STOCK_COMPANY ->
-                        companyStockController.processCompanyStockRelationship(request);
+                case GET_STOCKS_BY_COMPANY -> companyController.getCompanyStocks(request);
+                case JOIN_STOCK_COMPANY -> companyController.addStockToCompany(request);
+                case SEPARATE_STOCK_COMPANY -> companyController.removeStockFromCompany(request);
 
                 // SYSTEM
                 case LOGIN -> userController.login(request);

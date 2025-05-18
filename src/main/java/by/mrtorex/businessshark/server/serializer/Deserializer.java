@@ -29,7 +29,7 @@ public class Deserializer {
                 // Many-to-many relations
                 case JOIN_STOCK_COMPANY, SEPARATE_STOCK_COMPANY ->
                         gson.fromJson(request.getData(), new TypeToken<Pair<Stock, Company>>() {}.getType());
-                case GET_STOCK_BY_COMPANY -> gson.fromJson(request.getData(), Company.class);
+                case GET_STOCKS_BY_COMPANY -> gson.fromJson(request.getData(), Company.class);
                 case GET_COMPANY_BY_STOCK -> gson.fromJson(request.getData(), Stock.class);
 
                 // Default case

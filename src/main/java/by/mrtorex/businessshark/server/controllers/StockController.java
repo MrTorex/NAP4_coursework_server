@@ -68,17 +68,15 @@ public class StockController {
         }
     }
 
-    public Response getStocksByCompany(Request request) {
-        /*Deserializer deserializer = new Deserializer();
-        String companyName = (String) deserializer.extractData(request);
-
+    public Response getAllStocksWithNoCompany()
+    {
         try {
-            String stocksJson = Serializer.toJson(stockService.findByCompanyName(companyName));
+            String stocksJson = Serializer.toJson(stockService.findAllEntitiesWithNoCompany());
             return new Response(true, "Stocks retrieved successfully", stocksJson);
-        } catch (ResponseException e) {
-            return new Response(false, e.getMessage(), null);
-        }*/
-        return new Response(true, "INDEV", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Response(false, "Failed to retrieve stocks", null);
+        }
     }
 
     public Response updateStock(Request request) {
