@@ -32,6 +32,17 @@ public class Deserializer {
                 case GET_STOCKS_BY_COMPANY -> gson.fromJson(request.getData(), Company.class);
                 case GET_COMPANY_BY_STOCK -> gson.fromJson(request.getData(), Stock.class);
 
+                // Portfolio operations
+                case ADD_USER_STOCK, UPDATE_USER_STOCK ->
+                        gson.fromJson(request.getData(), new TypeToken<Pair<Pair<Stock,Integer>, Integer>>() {}.getType());
+                case GET_USER_STOCK, DELETE_USER_STOCK ->
+                        gson.fromJson(request.getData(), new TypeToken<Pair<Integer, Integer>>() {}.getType());
+                case GET_ALL_USER_STOCKS ->
+                        gson.fromJson(request.getData(), Integer.class); // userId
+                case GET_USER_ACCOUNT -> gson.fromJson(request.getData(), Integer.class);
+                case GET_STOCK_AVAILABLE_AMOUNT -> gson.fromJson(request.getData(), Integer.class);
+                case SET_USER_ACCOUNT -> gson.fromJson(request.getData(), new TypeToken<Pair<Integer,Double>>() {}.getType());
+
                 // Default case
                 default -> null;
             };

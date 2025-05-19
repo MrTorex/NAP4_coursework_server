@@ -16,7 +16,7 @@ public class ClientThread implements Runnable {
     private final UserController userController;
     private final CompanyController companyController;
     private final RoleController roleController;
-    private final CompanyStockController companyStockController;
+    private final PortfolioController portfolioController;
 
     public ClientThread(Socket socket) {
         this.clientSocket = socket;
@@ -24,7 +24,7 @@ public class ClientThread implements Runnable {
         userController = new UserController();
         companyController = new CompanyController();
         roleController = new RoleController();
-        companyStockController = new CompanyStockController();
+        portfolioController = new PortfolioController();
     }
 
     public void run() {
@@ -103,6 +103,17 @@ public class ClientThread implements Runnable {
                 case JOIN_STOCK_COMPANY -> companyController.addStockToCompany(request);
                 case SEPARATE_STOCK_COMPANY -> companyController.removeStockFromCompany(request);
 
+                // Portfolio operations
+                case ADD_USER_STOCK -> portfolioController.addUserStock(request);
+                case GET_USER_STOCK -> portfolioController.getUserStock(request);
+                case UPDATE_USER_STOCK -> portfolioController.updateUserStock(request);
+                case DELETE_USER_STOCK -> portfolioController.deleteUserStock(request);
+                case GET_ALL_USER_STOCKS -> portfolioController.getAllUserStocks(request);
+                case GET_ALL_USER_STOCK_IDS -> portfolioController.getAllUserStockIds();
+                case GET_USER_ACCOUNT -> portfolioController.getAccount(request);
+                case SET_USER_ACCOUNT -> portfolioController.setAccount(request);
+                case GET_STOCK_AVAILABLE_AMOUNT -> portfolioController.getStockAvailableAmount(request);
+
                 // SYSTEM
                 case LOGIN -> userController.login(request);
                 case REGISTER -> userController.register(request);
@@ -127,4 +138,3 @@ public class ClientThread implements Runnable {
         }
     }
 }
-

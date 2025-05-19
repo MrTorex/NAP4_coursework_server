@@ -58,9 +58,9 @@ public class StockDAO implements DAO<Stock> {
             session.beginTransaction();
 
             String sql = """
-            SELECT * FROM Stocks 
-            WHERE id NOT IN (SELECT stock_id FROM Company_Stock)
-        """;
+            SELECT * FROM public.Stocks\s
+            WHERE id NOT IN (SELECT stock_id FROM public.Company_Stock)
+       \s""";
 
             List<Stock> unassignedStocks = session
                     .createNativeQuery(sql, Stock.class)
