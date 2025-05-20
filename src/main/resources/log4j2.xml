@@ -115,6 +115,10 @@
             <AppenderRef ref="LogFile" />
             <AppenderRef ref="Console" />
         </Logger>
+        <Logger name="by.mrtorex.businessshark.server.serializer.Serializer" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
         <Root level="warn">
             <AppenderRef ref="Console" />
         </Root>

@@ -1,26 +1,29 @@
 package by.mrtorex.businessshark.server.serializer;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
- * Класс Serializer предоставляет методы для сериализации объектов
- * в JSON-строки с использованием библиотеки Gson.
+ * Класс для сериализации объектов в JSON формат.
  */
 public class Serializer {
+    private static final Logger logger = LogManager.getLogger(Serializer.class);
 
     /**
-     * Преобразует объект в JSON-строку.
+     * Сериализует объект в строку формата JSON.
      *
      * @param obj объект для сериализации
-     * @return JSON-строка, представляющая объект
-     * @throws IllegalArgumentException если объект не удалось сериализовать
+     * @return строка в формате JSON
+     * @throws IllegalArgumentException если не удалось сериализовать объект
      */
     public static String toJson(Object obj) {
         try {
-            Gson gson = new GsonBuilder().create();
+            Gson gson = new Gson();
             return gson.toJson(obj);
         } catch (Exception e) {
+            logger.error("Ошибка сериализации объекта в JSON: {}", e.getMessage());
             throw new IllegalArgumentException("Не удалось сериализовать объект в JSON", e);
         }
     }
