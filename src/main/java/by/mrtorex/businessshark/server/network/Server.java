@@ -2,80 +2,169 @@ package by.mrtorex.businessshark.server.network;
 
 import by.mrtorex.businessshark.server.config.SessionConfig;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ResourceBundle;
+import java.util.concurrent.*;
 
+/**
+ * Основной класс сервера, отвечающий за приём подключений клиентов, мониторинг активности и подключение к БД.
+ */
 public class Server {
-    private static int clientCount = 0;
-    private static long lastClientConnectedTime = System.currentTimeMillis();
+    private static final Logger logger = LogManager.getLogger(Server.class);
+    private static volatile int clientCount = 0;
+    private static volatile long lastClientConnectedTime = System.currentTimeMillis();
 
+    private static ServerSocket serverSocket;
+    private static ExecutorService clientExecutor;
+    private static ScheduledExecutorService monitorExecutor;
+    private static volatile boolean running = true;
+
+    /**
+     * Точка входа в приложение.
+     */
     public static void main(String[] args) {
+        Runtime.getRuntime().addShutdownHook(new Thread(Server::shutdown, "Shutdown-Hook"));
         startServer();
     }
 
+    /**
+     * Запускает сервер, инициализирует мониторинг и подключение к БД.
+     */
     private static void startServer() {
         ResourceBundle bundle = ResourceBundle.getBundle("server");
-        int serverPort = Integer.parseInt(bundle.getString("SERVER_PORT"));
+        int serverPort;
 
-        System.out.println("Сервер запускается...");
+        try {
+            serverPort = Integer.parseInt(bundle.getString("SERVER_PORT"));
+        } catch (NumberFormatException e) {
+            logger.error("Неверный формат порта сервера в конфигурационном файле", e);
+            throw new IllegalStateException("Невозможно запустить сервер");
+        }
 
-        try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
-            System.out.println("Сервер запущен на порте " + serverPort + "!");
+        clientExecutor = Executors.newCachedThreadPool();
+        monitorExecutor = Executors.newSingleThreadScheduledExecutor();
+
+        try {
+            serverSocket = new ServerSocket(serverPort);
+            logger.info("Сервер запущен на порте {}", serverPort);
 
             startMonitoring();
             connectToDatabase();
 
-            while (true) {
-                Socket clientAccepted = serverSocket.accept();
-
-                clientCount++;
-                lastClientConnectedTime = System.currentTimeMillis(); // Обновляем время последнего подключения
-                System.out.println("Соединение установлено... Текущее количество клиентов: " + clientCount);
-
-                new Thread(new ClientThread(clientAccepted)).start();
+            while (running) {
+                try {
+                    Socket client = serverSocket.accept();
+                    incrementClientCount();
+                    lastClientConnectedTime = System.currentTimeMillis();
+                    logger.info("Клиент подключился. Текущее количество клиентов: {}", clientCount);
+                    clientExecutor.submit(new ClientThread(client));
+                } catch (IOException e) {
+                    if (running) {
+                        logger.error("Ошибка при приёме клиента", e);
+                    }
+                }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            logger.error("Ошибка запуска сервера", e);
+        } finally {
+            shutdown();
         }
     }
 
+    /**
+     * Запускает мониторинг подключений и завершает сервер при длительном отсутствии клиентов.
+     */
     private static void startMonitoring() {
         ResourceBundle bundle = ResourceBundle.getBundle("server");
-        long monitoringInterval = Long.parseLong(bundle.getString("MONITORING_INTERVAL"));
-        long shutdownTime = Long.parseLong(bundle.getString("SHUTDOWN_TIME"));
+        long monitoringInterval;
+        long shutdownTime;
 
-        new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(monitoringInterval); // Логирование количества клиентов каждый интервал
+        try {
+            monitoringInterval = Long.parseLong(bundle.getString("MONITORING_INTERVAL"));
+            shutdownTime = Long.parseLong(bundle.getString("SHUTDOWN_TIME"));
+        } catch (NumberFormatException e) {
+            logger.error("Неверный формат интервалов мониторинга", e);
+            throw new IllegalStateException("Невозможно запустить мониторинг");
+        }
 
-                    long currentTime = System.currentTimeMillis();
-                    if (clientCount == 0 && (currentTime - lastClientConnectedTime) >= shutdownTime) {
-                        System.out.println("Нет подключенных клиентов. Сервер завершает работу.");
-                        System.exit(0); // Завершение работы сервера
-                    }
-
-                    System.out.println("Текущее количество клиентов: " + clientCount);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
+        monitorExecutor.scheduleAtFixedRate(() -> {
+            long now = System.currentTimeMillis();
+            if (clientCount == 0 && (now - lastClientConnectedTime) >= shutdownTime) {
+                logger.info("Нет подключенных клиентов в течение {} мс. Завершение сервера.", shutdownTime);
+                shutdown();
+            } else {
+                logger.info("Текущее количество клиентов: {}", clientCount);
             }
-        }).start();
+        }, 0, monitoringInterval, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * Потокобезопасное уменьшение счётчика клиентов.
+     */
     public static synchronized void decrementClientCount() {
-        clientCount--;
+        if (clientCount > 0) {
+            clientCount--;
+            logger.info("Клиент отключился. Оставшиеся клиенты: {}", clientCount);
+        } else {
+            logger.warn("Попытка уменьшить счётчик клиентов ниже нуля");
+        }
     }
 
+    /**
+     * Потокобезопасное увеличение счётчика клиентов.
+     */
+    private static synchronized void incrementClientCount() {
+        clientCount++;
+    }
+
+    /**
+     * Асинхронное подключение к базе данных.
+     */
     private static void connectToDatabase() {
         new Thread(() -> {
-            System.out.println("Попытка подключения к БД...");
+            logger.info("Попытка подключения к базе данных...");
             try {
-                System.out.println("Соединение с БД установлено: " + SessionConfig.getInstance());
+                SessionConfig config = SessionConfig.getInstance();
+                logger.info("Соединение с БД установлено: {}", config);
             } catch (Exception e) {
-                System.err.println("Соединение с БД установить не вышло: " + e.getMessage());
+                logger.error("Ошибка при подключении к БД: {}", e.getMessage());
             }
-        }).start();
+        }, "DB-Connection-Thread").start();
+    }
+
+    /**
+     * Корректное завершение всех ресурсов: сокета, потоков и планировщиков.
+     */
+    private static synchronized void shutdown() {
+        if (!running) return;
+
+        running = false;
+        logger.info("Начинается завершение работы сервера...");
+
+        try {
+            if (serverSocket != null && !serverSocket.isClosed()) {
+                serverSocket.close();
+                logger.info("Серверный сокет закрыт");
+            }
+        } catch (IOException e) {
+            logger.warn("Ошибка при закрытии серверного сокета", e);
+        }
+
+        if (monitorExecutor != null && !monitorExecutor.isShutdown()) {
+            monitorExecutor.shutdownNow();
+            logger.info("Мониторинг остановлен");
+        }
+
+        if (clientExecutor != null && !clientExecutor.isShutdown()) {
+            clientExecutor.shutdownNow();
+            logger.info("Потоки клиентов завершены");
+        }
+
+        logger.info("Сервер завершил работу.");
     }
 }

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="info">
     <Properties>
-        <Property name="layout">%d %-5level %logger - %m%n</Property>
+        <Property name="layout">%d %highlight{%-5level}{FATAL=red blink, ERROR=red, WARN=yellow, INFO=green, DEBUG=cyan, TRACE=blue} %logger - %msg%n</Property>
     </Properties>
 
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <LevelRangeFilter minLevel="FATAL" maxLevel="WARN" onMatch="ACCEPT" onMismatch="DENY" />
-            <PatternLayout pattern="${layout}" />
+            <PatternLayout pattern="${layout}" disableAnsi="false" />
         </Console>
         <RollingFile name="LogFile"
                      fileName="logs/server.log"
@@ -23,15 +23,99 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="main" level="info" additivity="false">
+        <Logger name="Server" level="info" additivity="false">
             <AppenderRef ref="LogFile" />
             <AppenderRef ref="Console" />
         </Logger>
-        <Logger name="loader" level="info" additivity="false">
+        <Logger name="by.mrtorex.businessshark.server.config.SessionConfig" level="info" additivity="false">
             <AppenderRef ref="LogFile" />
             <AppenderRef ref="Console" />
         </Logger>
-        <Root level="error">
+        <Logger name="by.mrtorex.businessshark.server.controllers.CompanyController" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.controllers.PortfolioController" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.controllers.RoleController" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.controllers.StockController" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.controllers.UserController" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.exceptions.ResponseException" level="error" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.interfaces.DAO" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.network.ClientThread" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.network.Server" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.repositories.CompanyDAO" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.repositories.PersonDAO" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.repositories.PortfolioDAO" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.repositories.RoleDAO" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.repositories.StockDAO" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.repositories.UserDAO" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.services.CompanyService" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.services.PersonService" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.services.PortfolioService" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.services.RoleService" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.services.StockService" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="by.mrtorex.businessshark.server.services.UserService" level="info" additivity="false">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Root level="warn">
             <AppenderRef ref="Console" />
         </Root>
     </Loggers>
