@@ -15,11 +15,22 @@ import org.hibernate.query.NativeQuery;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * DAO для работы с портфелем пользователя.
+ * Предоставляет методы для управления акциями пользователя и их балансом.
+ */
 public class PortfolioDAO {
 
     private static final Logger logger = LogManager.getLogger(PortfolioDAO.class);
     private final SessionFactory sessionFactory = SessionConfig.getInstance().getSessionFactory();
 
+    /**
+     * Сохраняет или добавляет акции в портфель пользователя.
+     * При наличии акций у пользователя их количество увеличивается.
+     *
+     * @param obj    объект {@link Pair}, содержащий акцию и количество
+     * @param userId идентификатор пользователя
+     */
     public void save(Pair<Stock, Integer> obj, int userId) {
         executeTransaction(session -> {
             String sql = """
@@ -37,6 +48,13 @@ public class PortfolioDAO {
         });
     }
 
+    /**
+     * Обновляет количество акций в портфеле пользователя.
+     * Если итоговое количество акций <= 0, они удаляются из портфеля.
+     *
+     * @param obj    объект {@link Pair}, содержащий акцию и количество для вычитания
+     * @param userId идентификатор пользователя
+     */
     public void update(Pair<Stock, Integer> obj, int userId) {
         executeTransaction(session -> {
             Pair<Stock, Integer> current = findByIds(userId, obj.getKey().getId());
@@ -66,6 +84,12 @@ public class PortfolioDAO {
         });
     }
 
+    /**
+     * Удаляет акции из портфеля пользователя.
+     *
+     * @param userId  идентификатор пользователя
+     * @param stockId идентификатор акции
+     */
     public void delete(int userId, int stockId) {
         executeTransaction(session -> {
             String sql = "DELETE FROM User_Stock WHERE user_id = :userId AND stock_id = :stockId";
@@ -78,6 +102,13 @@ public class PortfolioDAO {
         });
     }
 
+    /**
+     * Возвращает информацию об акциях пользователя по их ID.
+     *
+     * @param userId  идентификатор пользователя
+     * @param stockId идентификатор акции
+     * @return объект {@link Pair} с акцией и количеством или null, если не найдено
+     */
     public Pair<Stock, Integer> findByIds(int userId, int stockId) {
         try (Session session = sessionFactory.openSession()) {
             String sql = """
@@ -99,6 +130,12 @@ public class PortfolioDAO {
         }
     }
 
+    /**
+     * Возвращает список всех акций пользователя.
+     *
+     * @param userId идентификатор пользователя
+     * @return список объектов {@link Pair}, содержащих акции и их количество
+     */
     public List<Pair<Stock, Integer>> findAllUserStocks(int userId) {
         try (Session session = sessionFactory.openSession()) {
             String sql = """
@@ -119,6 +156,12 @@ public class PortfolioDAO {
         }
     }
 
+    /**
+     * Преобразует строку результата запроса в объект {@link Pair} с акцией и количеством.
+     *
+     * @param row массив данных из результата SQL-запроса
+     * @return объект {@link Pair} с акцией и количеством
+     */
     private Pair<Stock, Integer> getStockIntegerPair(Object[] row) {
         Stock stock = new Stock();
         stock.setId(((Number) row[0]).intValue());
@@ -130,6 +173,11 @@ public class PortfolioDAO {
         return new Pair<>(stock, userAmount);
     }
 
+    /**
+     * Возвращает список всех записей связей пользователей и акций.
+     *
+     * @return список объектов {@link Pair} с ID пользователя и ID акции
+     */
     public List<Pair<Integer, Integer>> findAll() {
         try (Session session = sessionFactory.openSession()) {
             String sql = "SELECT user_id, stock_id FROM User_Stock";
@@ -144,6 +192,12 @@ public class PortfolioDAO {
         }
     }
 
+    /**
+     * Возвращает баланс счета пользователя.
+     *
+     * @param userId идентификатор пользователя
+     * @return баланс счета или -1.0 в случае ошибки
+     */
     public Double getAccount(int userId) {
         try (Session session = sessionFactory.openSession()) {
             String sql = "SELECT account FROM Accounts WHERE user_id = :userId";
@@ -152,15 +206,21 @@ public class PortfolioDAO {
             query.setParameter("userId", userId);
             Object result = query.uniqueResult();
 
-            if (result == null) return 0.0;
+            if (result == null) return -1.0;
             if (result instanceof Number) return ((Number) result).doubleValue();
             return 0.0;
         } catch (Exception e) {
             logger.error("Ошибка получения баланса пользователя {}", userId, e);
-            return 0.0;
+            return -1.0;
         }
     }
 
+    /**
+     * Устанавливает или обновляет баланс счета пользователя.
+     *
+     * @param userId  идентификатор пользователя
+     * @param account новый баланс
+     */
     public void setAccount(int userId, double account) {
         executeTransaction(session -> {
             String sql = """
@@ -177,6 +237,12 @@ public class PortfolioDAO {
         });
     }
 
+    /**
+     * Возвращает доступное количество акций для указанного ID акции.
+     *
+     * @param stockId идентификатор акции
+     * @return доступное количество акций или 0 в случае ошибки
+     */
     public int getAvailableAmount(int stockId) {
         try (Session session = sessionFactory.openSession()) {
             String sql = """
@@ -200,6 +266,11 @@ public class PortfolioDAO {
         }
     }
 
+    /**
+     * Выполняет транзакцию с использованием предоставленного действия.
+     *
+     * @param action действие, выполняемое в рамках транзакции
+     */
     private void executeTransaction(TransactionConsumer action) {
         try (Session session = sessionFactory.openSession()) {
             Transaction tx = session.beginTransaction();
@@ -211,8 +282,16 @@ public class PortfolioDAO {
         }
     }
 
+    /**
+     * Функциональный интерфейс для выполнения операций в рамках транзакции.
+     */
     @FunctionalInterface
     private interface TransactionConsumer {
+        /**
+         * Выполняет действие с использованием сессии Hibernate.
+         *
+         * @param session сессия Hibernate
+         */
         void accept(Session session);
     }
 }

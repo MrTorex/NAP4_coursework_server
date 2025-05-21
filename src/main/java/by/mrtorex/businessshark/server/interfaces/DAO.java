@@ -67,7 +67,7 @@ public interface DAO<T> {
         Transaction transaction = null;
         try (Session session = sessionFactory.openSession()) {
             transaction = session.beginTransaction();
-            logger.info("Начата транзакция для объекта {}", obj.getClass().getSimpleName());
+            logger.info("Начата транзакция для объекта");
 
             action.accept(session, obj);
 
